@@ -2,6 +2,9 @@ package com.kosalgeek.java.mysqljavaconnection;
 
 import java.sql.*;
 import java.util.LinkedHashMap;
+import java.util.Vector;
+
+import javax.swing.table.DefaultTableModel;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
@@ -86,13 +89,46 @@ public class MySqlConnection {
 				index++;
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		return stmt;
-		
-		
+	}
+	
+	public DefaultTableModel buildTableModel(ResultSet rs)
+	        throws SQLException {
+
+	    ResultSetMetaData metaData = rs.getMetaData();
+
+	    // names of columns
+	    Vector<String> columnNames = new Vector<String>();
+	    int columnCount = metaData.getColumnCount();
+	    for (int column = 1; column <= columnCount; column++) {
+	        columnNames.add(metaData.getColumnName(column));
+	    }
+
+	    // data of the table
+	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+	    while (rs.next()) {
+	        Vector<Object> vector = new Vector<Object>();
+	        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+	            vector.add(rs.getObject(columnIndex));
+	        }
+	        data.add(vector);
+	    }
+	    return new DefaultTableModel(data, columnNames);
+	}
+	
+	public DefaultTableModel buildTableModel(String sql)
+	        throws SQLException {
+		ResultSet rs = execQuery(sql);
+		return buildTableModel(rs);
+	}
+	
+	public DefaultTableModel buildTableModel(String sql, LinkedHashMap data)
+	        throws SQLException {
+		ResultSet rs = execQuery(sql, data);
+		return buildTableModel(rs);
 	}
 	
 }
